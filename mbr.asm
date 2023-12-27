@@ -89,7 +89,7 @@ CODE_SEG equ code_descriptor - GDT_Start
 DATA_SEG equ data_descriptor - GDT_Start
 ; eq is used to set constant
 
-KERNEL_LOCATION equ 0x1000
+KERNEL_LOCATION equ 0x200
 
 GDT_Descriptor:
     dw GDT_End - GDT_Start - 1 ;size

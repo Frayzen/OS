@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS= -ffreestanding -m32 -fno-pie -g 
+CFLAGS= -m32
 
 KERN_ENT= kernel_entry.o
 KERN_BASE= kernel_base.o
@@ -29,14 +29,13 @@ $(BUILD)/$(KERN_BASE): kernel_base.c
 	$(CC) -c $< $(CFLAGS) -o $@
 
 $(BUILD)/$(KERN): $(BUILD)/$(KERN_ENT) $(BUILD)/$(KERN_BASE)
-	$(LD) -m elf_i386 -s -o $@ -Ttext 0x1000 $^ --oformat binary
+	$(LD) -o $@.elf -Ttext 0x1000 $(BUILD)/$(KERN_ENT) $(BUILD)/$(KERN_BASE) -m elf_i386
+	objcopy -O binary $@.elf $@ -F elf32-i386
 
-$(BUILD)/$(OS): $(BUILD)/$(BOOTLOADER) $(BUILD)/$(KERN)
-	cat $^ > $(BUILD)/$(OS)
-
-$(OUT): $(BUILD)/$(OS)
+$(OUT): $(BUILD)/$(BOOTLOADER) $(BUILD)/$(KERN)
 	dd if=/dev/zero of=$@ bs=512 count=100
-	dd if=$< of=$@ bs=512 count=1 conv=notrunc
+	dd if=$(BUILD)/$(BOOTLOADER) of=$@ count=1 conv=notrunc
+	dd if=$(BUILD)/$(KERN) of=$@ seek=1 skip=1 conv=notrunc
 
 %.o: %.c
 	$(CC) $(CFLAGS) -o $(BUILD)/$@ -c $<
