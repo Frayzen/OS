@@ -103,12 +103,15 @@ BOOT_DISK: db 0
 
 [bits 32]
 start_protected_mode:
-    ; in protected mode, video memory starts at 0xb8000
-    ; first byte: char | second byte: colour
-    mov al, 'A'
-    mov ah, 0x0f
-    mov [0xb8000], ax
-    jmp $
+    mov ax, DATA_SEG
+    mov ds, ax
+    mov ss, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ebp, 0x90000
+    mov esp, ebp
+    jmp KERNEL_LOCATION
 
 times 510 - ($ - $$) db 0
 dw 0xaa55
