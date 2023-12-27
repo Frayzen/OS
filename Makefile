@@ -16,7 +16,7 @@ $(OUT): $(BUILD)/$(MBR)
 	dd if=$< of=$@ bs=512 count=1 conv=notrunc
 
 run: build
-	qemu-system-x86_64 -hda $(OUT) -nographic -echr 24 
+	qemu-system-x86_64 -hda $(OUT) -echr 24 
 
 clean:
 	$(RM) $(BUILD)/* $(OUT) 
