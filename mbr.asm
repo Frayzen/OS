@@ -2,14 +2,16 @@ bits 16
 org 0x7c00
 
 ;
-; CODE
+; REAL MODE CODE
 ;
 
 mov [BOOT_DISK], dl  ; save disk number
 
 ; Setup stack
-mov bp, 0x7c00
+mov bp, 0x8000
 mov sp, bp
+
+;Print text
 mov si, text
 loop:
     lodsb
@@ -18,6 +20,27 @@ loop:
     or al, al
     jne loop
 ; end loop
+
+; Read kernel
+xor ax, ax ; reset ax, es and ds
+mov es, ax
+mov ds, ax
+; setup the int
+mov bx, KERNEL_LOCATION ; ES:BX is the address of the buffer
+mov dh, 20              ; If something is broken this nb is probably too low
+
+mov ah, 0x02
+mov al, dh              ; nb of sector to be read
+mov ch, 0x00            ; cylinder nb (bits 0-5) upper bit of sector nb (6-7)
+mov cl, 0x02            ; sector nb (bits 0-5) drive nb (6-7)
+mov dh, 0x00            ; head nb
+mov dl, [BOOT_DISK]     ; drive nb
+int 0x13
+
+; Clear screen
+mov ah, 0x0
+mov al, 0x3
+int 0x10
 
 ; Start protected mode
 cli
@@ -66,11 +89,17 @@ CODE_SEG equ code_descriptor - GDT_Start
 DATA_SEG equ data_descriptor - GDT_Start
 ; eq is used to set constant
 
+KERNEL_LOCATION equ 0x1000
+
 GDT_Descriptor:
     dw GDT_End - GDT_Start - 1 ;size
     dd GDT_Start               ;start
 
 BOOT_DISK: db 0
+
+;
+; PROTECTED MODE CODE
+;
 
 [bits 32]
 start_protected_mode:
