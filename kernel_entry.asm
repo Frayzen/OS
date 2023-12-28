@@ -1,5 +1,5 @@
 bits 32
-extern test
+extern kernel_start
 kernel_entry:
-    call test
+    call kernel_start
     jmp $

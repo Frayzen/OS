@@ -25,10 +25,8 @@ loop:
 xor ax, ax ; reset ax, es and ds
 mov es, ax
 mov ds, ax
-; setup the int
 mov bx, KERNEL_LOCATION ; ES:BX is the address of the buffer
 mov dh, 20              ; If something is broken this nb is probably too low
-
 mov ah, 0x02
 mov al, dh              ; nb of sector to be read
 mov ch, 0x00            ; cylinder nb (bits 0-5) upper bit of sector nb (6-7)
@@ -37,10 +35,14 @@ mov dh, 0x00            ; head nb
 mov dl, [BOOT_DISK]     ; drive nb
 int 0x13
 
-; Clear screen
+; Set video mode
 mov ah, 0x0
 mov al, 0x3
-int 0x10
+int 0x10 
+; Hide cursors
+mov ah, 0x01   ; Set cursor function
+mov cx, 0x2607 ; Hide cursors
+int 0x10       ; BIOS video interrupt
 
 ; Start protected mode
 cli
